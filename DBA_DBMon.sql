@@ -18,10 +18,9 @@ GO
 DROP TABLE IF EXISTS [dbo].[tblDBMon_SQL_Servers]
 GO
 CREATE TABLE [dbo].[tblDBMon_SQL_Servers](
-	[Date_Captured] DATETIME NOT NULL,
-	[Handshake_Timestamp] DATETIME NULL,
 --Inventory
 	[Server_Name] NVARCHAR(128) NOT NULL,
+	[Handshake_Timestamp] DATETIME NULL,
 	[Domain] VARCHAR(50) NULL,
 	[IP_Address] VARCHAR(50) NULL,
 	[Port] INT NULL,
@@ -54,11 +53,12 @@ CREATE TABLE [dbo].[tblDBMon_SQL_Servers](
 	[TLog_Utlization] XML,
 	[Errors_And_Warnings] XML NULL,
 	[File_System_Space] XML NULL,
-	[Script_Version] XML NULL
+	[Script_Version] XML NULL,
+	[Date_Entered] DATETIME NOT NULL
 )
 
 ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [PK_tblDBMon_SQL_Servers_Server_Name] PRIMARY KEY CLUSTERED ([Server_Name]);
-ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [DF_tblDBMon_SQL_Servers_Date_Captured] DEFAULT GETDATE() FOR [Date_Captured] ;
+ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [DF_tblDBMon_SQL_Servers_Date_Entered] DEFAULT GETDATE() FOR [Date_Entered] ;
 ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [DF_tblDBMon_SQL_Servers_Is_Active] DEFAULT 1 FOR [Is_Active] ;
 ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [DF_tblDBMon_SQL_Servers_Production] DEFAULT 1 FOR [Is_Production] ;
 GO
@@ -69,3 +69,48 @@ GO
 SELECT * FROM [dbo].[tblDBMon_SQL_Servers]
 GO
 
+DROP VIEW IF EXISTS [dbo].[vwDBMon_SQL_Servers]
+GO
+
+CREATE VIEW [dbo].[vwDBMon_SQL_Servers]
+AS
+SELECT	[Server_Name],
+		[Handshake_Timestamp],
+		DATEDIFF(mi, [Handshake_Timestamp], GETDATE()) AS [Last_Handshake_Mins],
+		[Domain],
+		[IP_Address],
+		[Port],
+		[Is_Active],
+		[Is_Production],
+		[Server_Host],
+		[Edition],
+		[Product_Version],
+		[Is_Clustered],
+		[Is_Hadr_Enabled],
+		[AOAG_Health],
+		[AOAG_Details],
+		[Application_Category],
+		[Application_Contact],
+		[Comments],
+		[CPU],
+		[Physical_Memory_KB],
+		[Committed_Target_KB],
+		[SQL_Memory_Model],
+		[Server_Services],
+		[SQLServer_Start_Time],
+		[Full_Backup_Timestamp],
+		[TLog_Backup_Timestamp],
+		[Blocking],
+		[CPU_Utilization],
+		[Page_Life_Expectancy],
+		[TLog_Utlization],
+		[Errors_And_Warnings],
+		[File_System_Space],
+		[Script_Version],
+		[Date_Entered]
+FROM [dbo].[tblDBMon_SQL_Servers]
+GO
+
+SELECT	*
+FROM	[dbo].[vwDBMon_SQL_Servers]
+GO
