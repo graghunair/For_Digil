@@ -1,6 +1,20 @@
 USE [DBA_DBMon]
 GO
 
+DROP TABLE IF EXISTS [dbo].[tblDBMon_SP_Version] 
+GO
+
+CREATE TABLE [dbo].[tblDBMon_SP_Version](
+		[SP_Name]			SYSNAME,
+		[SP_Version]		VARCHAR(15),
+		[Last_Executed]		DATETIME,
+		[Date_Modified]		DATETIME,
+	CONSTRAINT [PK_tblDBMon_SP_Version] PRIMARY KEY CLUSTERED 
+(
+	[SP_Name] ASC
+))
+GO
+
 DROP TABLE IF EXISTS [dbo].[tblDBMon_SQL_Servers]
 GO
 CREATE TABLE [dbo].[tblDBMon_SQL_Servers](
