@@ -1,6 +1,20 @@
 USE [dba_local]
 GO
 
+DROP TABLE IF EXISTS [dbo].[tblDBMon_SP_Version] 
+GO
+
+CREATE TABLE [dbo].[tblDBMon_SP_Version](
+		[SP_Name]			SYSNAME,
+		[SP_Version]		VARCHAR(15),
+		[Last_Executed]		DATETIME,
+		[Date_Modified]		DATETIME,
+	CONSTRAINT [PK_tblDBMon_SP_Version] PRIMARY KEY CLUSTERED 
+(
+	[SP_Name] ASC
+))
+GO
+
 DROP TABLE IF EXISTS [dbo].[tblDBMon_SQL_Server]
 GO
 CREATE TABLE [dbo].[tblDBMon_SQL_Server](
@@ -137,37 +151,100 @@ SELECT
 		NULL AS [File_System_Space],
 		NULL AS [Script_Version]
 
-SELECT
-		GETDATE() AS [Date_Captured],
-		CAST(SERVERPROPERTY('ServerName') AS NVARCHAR(128)) AS [Server_Name],
-		@varDomain AS [Domain],
-		@varIP AS [IP_Address],
-		@varPort AS [Port],
-		CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') AS NVARCHAR(128)) AS [Server_Host],
-		CAST(SERVERPROPERTY('Edition') AS NVARCHAR(128)) AS [Edition],
-		CAST(SERVERPROPERTY('ProductVersion') AS NVARCHAR(128)) AS [Product_Version],
-		CAST(SERVERPROPERTY('IsClustered') AS BIT) AS [Is_Clustered],
-		CAST(SERVERPROPERTY('IsHadrEnabled') AS BIT) AS [Is_Hadr_Enabled],
-		NULL AS [AOAG_Health],
-		NULL AS [AOAG_Details],
-		@varCPU AS [CPU], 
-		@varPhysical_Memory_KB AS [Physical_Memory_KB],
-		@varCommitted_Target_KB AS [Committed_Target_KB],
-		@varSQL_Memory_Model AS [SQL_Memory_Model],
-		@varServerServices AS [Server_Services],
-		@varSQLServer_Start_Time AS [SQLServer_Start_Time],
-		NULL AS [Full_Backup_Timestamp],
-		NULL AS [TLog_Backup_Timestamp],
-		NULL AS [Blocking],
-		NULL AS [CPU_Utilization],
-		NULL AS [Page_Life_Expectancy],
-		NULL AS [TLog_Utlization],
-		NULL AS [Errors_And_Warnings],
-		NULL AS [File_System_Space],
-		NULL AS [Script_Version]
+UPDATE	[dbo].[tblDBMon_SP_Version]
+SET		[Last_Executed] = GETDATE()
+WHERE	[SP_Name] = OBJECT_NAME(@@PROCID)
 GO
 
-EXEC dbo.uspDBMon
+IF EXISTS (SELECT TOP 1 1 FROM [dbo].[tblDBMon_SP_Version] WHERE [SP_Name] = 'uspDBMon')
+	BEGIN
+		UPDATE	[dbo].[tblDBMon_SP_Version]
+		SET		[SP_Version] = '1.0',
+				[Last_Executed] = NULL,
+				[Date_Modified] = GETDATE()
+		WHERE	[SP_Name] = 'uspDBMon'
+	END
+ELSE
+	BEGIN
+		INSERT INTO [dbo].[tblDBMon_SP_Version] ([SP_Name], [SP_Version], [Last_Executed], [Date_Modified])
+		VALUES ('uspDBMon', '1.0', NULL, GETDATE())
+	END
+GO
+
+EXEC sp_addextendedproperty 
+	@name = 'Version', @value = '1.0', 
+	@level0type = 'SCHEMA', @level0name = 'dbo', 
+	@level1type = 'PROCEDURE', @level1name = 'uspDBMon'
+GO
+
+EXEC [dbo].[uspDBMon]
 GO
 SELECT * FROM [dbo].[tblDBMon_SQL_Server]
 GO
+
+DROP PROCEDURE IF EXISTS [dbo].[uspDBMon_GetHandshakeInfo]
+GO
+CREATE PROCEDURE [dbo].[uspDBMon_GetHandshakeInfo]
+AS
+SET NOCOUNT ON
+
+SELECT		TOP 1
+			[Date_Captured],
+			[Server_Name],
+			[Domain],
+			[IP_Address],
+			[Port],
+			[Server_Host],
+			[Edition],
+			[Product_Version],
+			[Is_Clustered],
+			[Is_Hadr_Enabled],
+			[AOAG_Health],
+			[AOAG_Details],
+			[CPU],
+			[Physical_Memory_KB],
+			[Committed_Target_KB],
+			[SQL_Memory_Model],
+			[Server_Services],
+			[SQLServer_Start_Time],	
+			[Full_Backup_Timestamp],
+			[TLog_Backup_Timestamp],
+			[Blocking],
+			[CPU_Utilization],
+			[Page_Life_Expectancy],
+			[TLog_Utlization],
+			[Errors_And_Warnings],
+			[File_System_Space],
+			[Script_Version]
+FROM		[dbo].[tblDBMon_SQL_Server]
+ORDER BY	[Date_Captured] DESC
+
+UPDATE	[dbo].[tblDBMon_SP_Version]
+SET		[Last_Executed] = GETDATE()
+WHERE	[SP_Name] = OBJECT_NAME(@@PROCID)
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM [dbo].[tblDBMon_SP_Version] WHERE [SP_Name] = 'uspDBMon_GetHandshakeInfo')
+	BEGIN
+		UPDATE	[dbo].[tblDBMon_SP_Version]
+		SET		[SP_Version] = '1.0 GHI',
+				[Last_Executed] = NULL,
+				[Date_Modified] = GETDATE()
+		WHERE	[SP_Name] = 'uspDBMon_GetHandshakeInfo'
+	END
+ELSE
+	BEGIN
+		INSERT INTO [dbo].[tblDBMon_SP_Version] ([SP_Name], [SP_Version], [Last_Executed], [Date_Modified])
+		VALUES ('uspDBMon_GetHandshakeInfo', '1.0 GHI', NULL, GETDATE())
+	END
+GO
+
+EXEC sp_addextendedproperty 
+	@name = 'Version', @value = '1.0 GHI', 
+	@level0type = 'SCHEMA', @level0name = 'dbo', 
+	@level1type = 'PROCEDURE', @level1name = 'uspDBMon_GetHandshakeInfo'
+GO
+
+EXEC [dbo].[uspDBMon_GetHandshakeInfo]
+GO
+SELECT * FROM [dbo].[tblDBMon_SP_Version]
