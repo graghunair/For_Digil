@@ -28,7 +28,7 @@ CREATE TABLE [dbo].[tblDBMon_SQL_Servers](
 	[Physical_Memory_KB] BIGINT NULL,
 	[Committed_Target_KB] BIGINT NULL,
 --Configuration
-	[SQL_Memory_Model_Desc] NVARCHAR(120) NULL,
+	[SQL_Memory_Model] NVARCHAR(120) NULL,
 	[Server_Services] XML,
 --Monitoring
 	[SQLServer_Start_Time] DATETIME NULL,	
