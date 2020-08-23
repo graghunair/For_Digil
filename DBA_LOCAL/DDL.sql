@@ -27,7 +27,7 @@ CREATE TABLE [dbo].[tblDBMon_SP_Version](
 		[Last_Executed]		DATETIME,
 		[Date_Modified]		DATETIME)
 GO
-ALTER TABLE [dbo].[tblDBMon_Config_Details] ADD CONSTRAINT [PK_tblDBMon_SP_Version] PRIMARY KEY ([SP_Name])
+ALTER TABLE [dbo].[tblDBMon_SP_Version] ADD CONSTRAINT [PK_tblDBMon_SP_Version] PRIMARY KEY ([SP_Name])
 GO
 
 DROP TABLE IF EXISTS [dbo].[tblDBMon_SQL_Server]
