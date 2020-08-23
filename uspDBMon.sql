@@ -58,7 +58,7 @@ SET ANSI_WARNINGS OFF
 
 SELECT	@varPurge_tblDBMon_SQL_Server_Threshold = [Config_Parameter_Value]
 FROM	[dbo].[tblDBMon_Config_Details]
-WHERE	[Config_Parameter] = '@varPurge_tblDBMon_SQL_Server_Threshold'
+WHERE	[Config_Parameter] = 'Purge_tblDBMon_SQL_Server_Threshold'
 
 EXEC master..xp_regread		N'HKEY_LOCAL_MACHINE',
 							N'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\',
