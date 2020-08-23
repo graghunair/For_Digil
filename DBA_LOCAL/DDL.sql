@@ -4,6 +4,22 @@ GO
 USE [DBA_DBMon]
 GO
 
+CREATE TABLE [dbo].[tblDBMon_Config_Details](
+	[Config_Parameter] [varchar](100) NOT NULL,
+	[Config_Parameter_Value] [varchar](400) NOT NULL,
+	[Updated_By] [nvarchar](256) NOT NULL,
+	[Date_Updated] [datetime] NOT NULL) 
+GO
+
+ALTER TABLE [dbo].[tblDBMon_Config_Details] ADD CONSTRAINT [PK_tblDBMon_Config_Details_Config_Parameter] PRIMARY KEY ([Config_Parameter])
+ALTER TABLE [dbo].[tblDBMon_Config_Details] ADD  CONSTRAINT [DF_tblDBMon_Config_Details_Updated_By]  DEFAULT (suser_sname()) FOR [Updated_By]
+ALTER TABLE [dbo].[tblDBMon_Config_Details] ADD  CONSTRAINT [DF_tblDBMon_Config_Details_Date_Updated]  DEFAULT (getdate()) FOR [Date_Updated]
+GO
+
+INSERT INTO [dbo].[tblDBMon_Config_Details]([Config_Parameter], [Config_Parameter_Value]) VALUES ('Purge_tblDBMon_SQL_Server_Threshold','10')
+INSERT INTO [dbo].[tblDBMon_Config_Details]([Config_Parameter], [Config_Parameter_Value]) VALUES ('Blocking_Milliseconds_Threshold','15000')
+GO
+
 DROP TABLE IF EXISTS [dbo].[tblDBMon_SP_Version] 
 GO
 CREATE TABLE [dbo].[tblDBMon_SP_Version](
@@ -67,6 +83,7 @@ GO
 INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-0')
 INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-1')
 GO
+
 SELECT * FROM [dbo].[tblDBMon_SQL_Servers]
 GO
 
