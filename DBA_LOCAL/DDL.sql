@@ -1,9 +1,11 @@
 SET NOCOUNT ON
 GO
 
-USE [DBA_DBMon]
+USE [dba_local]
 GO
 
+DROP TABLE IF EXISTS [dbo].[tblDBMon_Config_Details]
+GO
 CREATE TABLE [dbo].[tblDBMon_Config_Details](
 	[Config_Parameter] [varchar](100) NOT NULL,
 	[Config_Parameter_Value] [varchar](400) NOT NULL,
@@ -80,8 +82,11 @@ ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [DF_tblDBMon_SQL_Servers
 ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [DF_tblDBMon_SQL_Servers_Production] DEFAULT 1 FOR [Is_Production] ;
 GO
 
-INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-0')
-INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-1')
+--INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-0')
+--INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-1')
+--GO
+INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('GORAGHU-QATAR')
+INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('GORAGHU-QATAR\SQL2016')
 GO
 
 SELECT * FROM [dbo].[tblDBMon_SQL_Servers]
