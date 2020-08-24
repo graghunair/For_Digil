@@ -41,7 +41,7 @@ CREATE TABLE [dbo].[tblDBMon_SQL_Server](
 	[Server_Name] [nvarchar](128) NOT NULL,
 	[Domain] [varchar](50) NULL,
 	[IP_Address] [varchar](50) NULL,
-	[Port] [int] NULL,
+	[Port] [varchar](10) NULL,
 	[Server_Host] [nvarchar](128) NULL,
 	[Edition] [nvarchar](128) NULL,
 	[Product_Version] [nvarchar](128) NULL,
