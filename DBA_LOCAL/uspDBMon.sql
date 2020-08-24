@@ -44,8 +44,8 @@ SET NOCOUNT ON
 	DECLARE @varAvailabilityGroupProperties			XML
 
 --Get Instance IP Address and Port
-SELECT	TOP 1 @varPort = ISNULL([local_tcp_port],'NULL'),
-		@varIP = ISNULL([local_net_address], 'NULL')
+SELECT	TOP 1 @varPort = [local_tcp_port],
+		@varIP = [local_net_address]
 FROM	[sys].[dm_exec_connections] 
 WHERE	[local_tcp_port] IS NOT NULL
 AND		[session_id] IS NOT NULL;
