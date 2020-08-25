@@ -66,13 +66,10 @@ ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [DF_tblDBMon_SQL_Servers
 ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [DF_tblDBMon_SQL_Servers_Production] DEFAULT 1 FOR [Is_Production] ;
 GO
 
---INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-0')
---INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-1')
-
-INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('GORAGHU-QATAR')
-INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('GORAGHU-QATAR\SQL2016')
-
+INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-0')
+INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-1')
 GO
+
 SELECT * FROM [dbo].[tblDBMon_SQL_Servers]
 GO
 
