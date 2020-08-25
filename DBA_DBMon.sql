@@ -29,6 +29,7 @@ CREATE TABLE [dbo].[tblDBMon_SQL_Servers](
 	[Server_Host] nvarchar(128) NULL,
 	[Edition] nvarchar(128) NULL,
 	[Product_Version] nvarchar(128) NULL,
+	[OS_Version] NVARCHAR(128) NULL,
 	[Is_Clustered] BIT NULL,
 	[Is_Hadr_Enabled] BIT NULL,
 	[User_Databases] SMALLINT NULL,
@@ -43,6 +44,7 @@ CREATE TABLE [dbo].[tblDBMon_SQL_Servers](
 	[Committed_Target_KB] BIGINT NULL,
 --Configuration
 	[SQL_Memory_Model] NVARCHAR(120) NULL,
+	[Instant_File_Initialization_Enabled] [NVARCHAR](1) NULL,
 	[Server_Services] XML,
 --Monitoring
 	[SQLServer_Start_Time] DATETIME NULL,	
@@ -64,8 +66,12 @@ ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [DF_tblDBMon_SQL_Servers
 ALTER TABLE [dbo].[tblDBMon_SQL_Servers] ADD CONSTRAINT [DF_tblDBMon_SQL_Servers_Production] DEFAULT 1 FOR [Is_Production] ;
 GO
 
-INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-0')
-INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-1')
+--INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-0')
+--INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('server-1')
+
+INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('GORAGHU-QATAR')
+INSERT INTO [dbo].[tblDBMon_SQL_Servers]([Server_Name]) VALUES ('GORAGHU-QATAR\SQL2016')
+
 GO
 SELECT * FROM [dbo].[tblDBMon_SQL_Servers]
 GO
@@ -86,6 +92,7 @@ SELECT	[Server_Name],
 		[Server_Host],
 		[Edition],
 		[Product_Version],
+		[OS_Version],
 		[Is_Clustered],
 		[Is_Hadr_Enabled],
 		[User_Databases],
@@ -98,6 +105,7 @@ SELECT	[Server_Name],
 		[Physical_Memory_KB],
 		[Committed_Target_KB],
 		[SQL_Memory_Model],
+		[Instant_File_Initialization_Enabled],
 		[Server_Services],
 		[SQLServer_Start_Time],
 		[Full_Backup_Timestamp],
