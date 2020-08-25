@@ -45,6 +45,7 @@ SELECT		TOP 1
 			[Physical_Memory_KB],
 			[Committed_Target_KB],
 			[SQL_Memory_Model],
+			[Instant_File_Initialization_Enabled],
 			[Server_Services],
 			[SQLServer_Start_Time],	
 			[Full_Backup_Timestamp],
