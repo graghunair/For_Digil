@@ -37,11 +37,14 @@ SET NOCOUNT ON
 	DECLARE @varCommitted_Target_KB					BIGINT
 	DECLARE @varSQLServer_Start_Time				DATETIME
 	DECLARE @varSQL_Memory_Model					NVARCHAR(120)
+	DECLARE @varInstant_File_Initialization_Enabled NVARCHAR(1)
 	DECLARE @varServerServices						XML
 	DECLARE @varPurge_tblDBMon_SQL_Server_Threshold TINYINT
 	DECLARE @varBlocking_Milliseconds_Threshold		SMALLINT
 	DECLARE @varBlocking							BIT
 	DECLARE @varAvailabilityGroupProperties			XML
+	DECLARE @varFullBackupTimestamp					XML
+	DECLARE @varTLogBackupTimestamp					XML
 
 --Get Instance IP Address and Port
 SELECT	TOP 1 @varPort = [local_tcp_port],
@@ -84,6 +87,47 @@ SELECT	@varCPU = [cpu_count],
 		@varSQL_Memory_Model = [sql_memory_model_desc]
 FROM	[sys].[dm_os_sys_info]
 
+SET @varFullBackupTimestamp = 
+			(SELECT		TOP 1 [name] as [Database_Name], 
+						DATEADD(S ,DATEDIFF (S, GETDATE(), GETUTCDATE()), ISNULL(backup_finish_date, 0)) Backup_Finish_Date
+			FROM		sys.databases [Database_Full_Backup_Timestamp]
+			LEFT JOIN	(
+							SELECT		a.[database_name], MAX(a.backup_finish_date) backup_finish_date
+							FROM		msdb.dbo.backupset a
+							WHERE		a.[type] = 'd'
+							GROUP BY	a.[database_name]
+						) a
+					ON	[name] = a.[database_name]
+			INNER JOIN	sys.database_mirroring
+					ON	[Database_Full_Backup_Timestamp].database_id = sys.database_mirroring.database_id
+			WHERE		[state] <> 6
+			AND			[Database_Full_Backup_Timestamp].database_id <> 2
+			AND			sys.fn_hadr_backup_is_preferred_replica([name]) = 1
+			AND			(sys.database_mirroring.mirroring_role <> 2 or sys.database_mirroring.mirroring_role is null)
+			ORDER BY	2
+			FOR XML AUTO, ELEMENTS)
+
+SET @varTLogBackupTimestamp = 
+			(SELECT		TOP 1 [name] as [Database_Name], 
+						DATEADD(S ,DATEDIFF (S, GETDATE(), GETUTCDATE()), ISNULL(backup_finish_date, 0)) Backup_Finish_Date
+			FROM		sys.databases [Database_TLog_Timestamp]
+			LEFT JOIN	(
+							SELECT		a.[database_name], MAX(a.backup_finish_date) backup_finish_date
+							FROM		msdb.dbo.backupset a
+							WHERE		a.[type] = 'l'
+							GROUP BY	a.[database_name]
+						) a
+					ON	[name] = a.[database_name]
+			INNER JOIN	sys.database_mirroring
+					ON	[Database_TLog_Timestamp].database_id = sys.database_mirroring.database_id 
+			WHERE		[Database_TLog_Timestamp].recovery_model <> 3 
+			AND			[state] = 0
+			AND			[Database_TLog_Timestamp].database_id <> 2
+			AND			sys.fn_hadr_backup_is_preferred_replica([name]) = 1
+			AND			(sys.database_mirroring.mirroring_role <> 2 or sys.database_mirroring.mirroring_role is null)
+			ORDER BY	2
+			FOR XML AUTO, ELEMENTS)
+
 --Get AlwaysOn Availability Group details
 SET @varAvailabilityGroupProperties = 
 		(SELECT		AGL.[dns_name] AS [Listner_Name], 
@@ -107,12 +151,15 @@ SET @varAvailabilityGroupProperties =
 		FOR XML AUTO, ELEMENTS)
 
 --Get SQL Server services details
+SELECT	@varInstant_File_Initialization_Enabled = [instant_file_initialization_enabled]
+FROM	[sys].[dm_server_services]
+WHERE	[filename] LIKE '%sqlservr.exe%'
+		
 SET		@varServerServices = 
 		(SELECT	[servicename] AS [Service_Name], 
 				[service_account] AS [Service_Account],
 				[startup_type_desc] AS [Startup_Type],	
-				[status_desc] AS [Status],
-				[instant_file_initialization_enabled] AS [Instant_File_Initialization]
+				[status_desc] AS [Status]
 		FROM	[sys].[dm_server_services] [Server_Services]
 		WHERE	[servicename] LIKE '%SQL Server%'
 		FOR XML AUTO, ELEMENTS)
@@ -136,6 +183,7 @@ INSERT INTO [dbo].[tblDBMon_SQL_Server](
 		[Physical_Memory_KB],
 		[Committed_Target_KB],
 		[SQL_Memory_Model],
+		[Instant_File_Initialization_Enabled],
 		[Server_Services],
 		[SQLServer_Start_Time],	
 		[Full_Backup_Timestamp],
@@ -165,10 +213,11 @@ SELECT
 		@varPhysical_Memory_KB AS [Physical_Memory_KB],
 		@varCommitted_Target_KB AS [Committed_Target_KB],
 		@varSQL_Memory_Model AS [SQL_Memory_Model],
+		@varInstant_File_Initialization_Enabled AS [Instant_File_Initialization_Enabled],
 		@varServerServices AS [Server_Services],
 		@varSQLServer_Start_Time AS [SQLServer_Start_Time],
-		NULL AS [Full_Backup_Timestamp],
-		NULL AS [TLog_Backup_Timestamp],
+		@varFullBackupTimestamp AS [Full_Backup_Timestamp],
+		@varTLogBackupTimestamp AS [TLog_Backup_Timestamp],
 		@varBlocking AS [Blocking],
 		NULL AS [CPU_Utilization],
 		NULL AS [Page_Life_Expectancy],
@@ -214,5 +263,7 @@ GO
 
 EXEC [dbo].[uspDBMon]
 GO
-SELECT * FROM [dbo].[tblDBMon_SQL_Server]
+SELECT	TOP 1 * 
+FROM	[dbo].[tblDBMon_SQL_Server]
+ORDER BY [Date_Captured] DESC
 GO
