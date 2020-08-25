@@ -79,43 +79,39 @@ GO
 CREATE VIEW [dbo].[vwDBMon_SQL_Servers]
 AS
 SELECT	[Server_Name],
-		[Handshake_Timestamp],
 		DATEDIFF(mi, [Handshake_Timestamp], GETDATE()) AS [Last_Handshake_Mins],
 		[Domain],
 		[IP_Address],
 		[Port],
-		[Is_Active],
 		[Is_Production],
-		[Server_Host],
 		[Edition],
-		[Product_Version],
+		CASE 
+			WHEN	[Product_Version] LIKE '10%' THEN '2008/R2'
+			WHEN	[Product_Version] LIKE '11%' THEN '2012'
+			WHEN	[Product_Version] LIKE '12%' THEN '2014'
+			WHEN	[Product_Version] LIKE '13%' THEN '2016'
+			WHEN	[Product_Version] LIKE '14%' THEN '2017'
+			WHEN	[Product_Version] LIKE '15%' THEN '2019'
+			ELSE 'Unknown'
+		END [SQL_Version],
 		[OS_Version],
-		[Is_Clustered],
 		[Is_Hadr_Enabled],
 		[User_Databases],
-		[AOAG_Health],
-		[AOAG_Details],
+		UPPER([AOAG_Details].value('(/AGL/Listener_Name)[1]', 'nvarchar(126)')) AS [Listener_Name],
+		[AOAG_Details].value('(/AGL/Port)[1]', 'INT') AS [Listener_Port],
+		[AOAG_Details].value('(/AGL/IP)[1]', 'nvarchar(126)') AS [Listener_IP],
+		[AOAG_Details].value('(/AGL/ARS/Role)[1]', 'nvarchar(126)') AS [AOAG_Role],
+		[AOAG_Details].value('(/AGL/ARS/AG/AR/AGS/Sync_Health)[1]', 'nvarchar(126)') AS [AOAG_Synchronization_Health],
+		[AOAG_Details].value('(/AGL/ARS/AG/AR/Availability_Mode)[1]', 'nvarchar(126)') AS AOAG_Availability_Mode,
+		[AOAG_Details].value('(/AGL/ARS/AG/AR/Failover_Mode)[1]', 'nvarchar(126)') AS AOAG_Failover_Mode,
 		[Application_Category],
-		[Application_Contact],
-		[Comments],
-		[CPU],
-		[Physical_Memory_KB],
-		[Committed_Target_KB],
-		[SQL_Memory_Model],
-		[Instant_File_Initialization_Enabled],
-		[Server_Services],
-		[SQLServer_Start_Time],
-		[Full_Backup_Timestamp],
-		[TLog_Backup_Timestamp],
-		[Blocking],
-		[CPU_Utilization],
-		[Page_Life_Expectancy],
-		[TLog_Utlization],
-		[Errors_And_Warnings],
-		[File_System_Space],
-		[Script_Version],
-		[Date_Entered]
+		DATEDIFF(hh, [SQLServer_Start_Time], GETDATE()) AS [Uptime_Hours],
+		[Full_Backup_Timestamp].value('(/Database_Full_Backup_Timestamp/Database_Name)[1]', 'varchar(50)') AS [Full_Backup_Database_Name],
+		DATEDIFF(dd, [Full_Backup_Timestamp].value('(/Database_Full_Backup_Timestamp/Backup_Finish_Date)[1]', 'varchar(50)') , GETDATE()) AS [Last_Full_Backup_Days],
+		[TLog_Backup_Timestamp].value('(/Database_TLog_Timestamp/Database_Name)[1]', 'varchar(50)') AS [TLog_Backup_Database_Name],
+		DATEDIFF(hh, [TLog_Backup_Timestamp].value('(/Database_TLog_Timestamp/Backup_Finish_Date)[1]', 'varchar(50)'), GETDATE()) AS [Last_TLog_Backup_Hours]
 FROM [dbo].[tblDBMon_SQL_Servers]
+WHERE	[Is_Active] = 1
 GO
 
 SELECT	*
