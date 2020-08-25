@@ -56,6 +56,7 @@ CREATE TABLE [dbo].[tblDBMon_SQL_Server](
 	[Committed_Target_KB] [bigint] NULL,
 --Configuration
 	[SQL_Memory_Model] [nvarchar](120) NULL,
+	[Instant_File_Initialization_Enabled] [nvarchar](1) NULL,
 	[Server_Services] [xml] NULL,
 --Monitoring
 	[SQLServer_Start_Time] [datetime] NULL,
